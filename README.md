@@ -31,6 +31,9 @@ WebScraper/
 
 ## Setup
 1. Clone the repository
+```bash
+    git clone https://github.com/zdowdy/WebScraper.git
+```    
 2. Create and activate a virtual environment
 ```bash
    python -m venv venv
@@ -63,10 +66,10 @@ the scheduler runs.
 queries, automated scheduling, data visualization
 
 ## Dependencies
-requests==2.34.2
-schedule==1.2.2
-pandas==3.0.3
-matplotlib==3.10.9
+- requests==2.34.2
+- schedule==1.2.2
+- pandas==3.0.3
+- matplotlib==3.10.9
 
 ## Author
 Zy Dowdy
