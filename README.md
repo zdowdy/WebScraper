@@ -18,6 +18,7 @@ averages and determine the best time to purchase PC memory.
   listing count, and average price by brand
 
 ## Project Structure
+```
 WebScraper/
 ├── config.py       # all settings and paths
 ├── scraper.py      # fetches and parses Newegg listings
@@ -26,6 +27,7 @@ WebScraper/
 ├── analyzer.py     # SQL aggregate queries via pandas
 ├── visualizer.py   # matplotlib chart generation
 └── requirements.txt
+```
 
 ## Setup
 1. Clone the repository
@@ -65,7 +67,6 @@ requests==2.34.2
 schedule==1.2.2
 pandas==3.0.3
 matplotlib==3.10.9
-Standard library: `sqlite3`, `json`, `logging`, `datetime`, `time`, `re`
 
 ## Author
 Zy Dowdy
