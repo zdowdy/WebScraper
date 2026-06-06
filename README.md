@@ -7,7 +7,7 @@ everyday consumers. I created this web scraper to visualize memory price
 averages and determine the best time to purchase PC memory.
 
 ## Sample Output
-![Price Trend](outputs/price_trend.png)
+![Price Trend](output/price_trend.png)
 
 ## Features
 - Scrapes all 20 pages of memory listings from Newegg
