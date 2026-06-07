@@ -16,7 +16,7 @@ def top_brands(conn):
         FROM products
         GROUP BY brand
         ORDER BY brand_count DESC
-"""
+    """
     df = pd.read_sql_query(sql,conn)
     return df
 
@@ -26,6 +26,26 @@ def avg_price_by_brand(conn):
         FROM products
         GROUP BY brand
         ORDER BY avg_price DESC
-"""
+    """
     df=pd.read_sql_query(sql, conn)
     return df
+
+def products_by_market_focus(conn):
+    sql="""
+        SELECT brand_focus.market_focus, AVG(products.price) as avg_price, COUNT(*) as product_count
+        FROM products
+        JOIN brand_focus ON products.brand = brand_focus.brand_name
+        GROUP BY brand_focus.market_focus
+        ORDER BY avg_price DESC
+    """
+    df=pd.read_sql_query(sql,conn)
+    return df
+
+if __name__ == "__main__":
+    import sqlite3
+    from config import DB_PATH
+    
+    conn = sqlite3.connect(DB_PATH)
+    df = products_by_market_focus(conn)
+    print(df)
+    conn.close()
