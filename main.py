@@ -2,8 +2,8 @@ import sqlite3
 import logging
 import schedule
 import time
-from config import DB_PATH, SCRAPE_INTERVAL_HOURS
-from database import init_db, insert_rows
+from config import DB_PATH, SCRAPE_INTERVAL_HOURS, BRANDS
+from database import init_db, insert_rows, insert_brands
 from scraper import scrape_all_pages
 
 logger = logging.getLogger(__name__)
@@ -11,6 +11,8 @@ logging.basicConfig(level=logging.INFO)
 
 conn=sqlite3.connect(DB_PATH)
 init_db(conn)
+
+insert_brands(conn,BRANDS)
 
 def scrape_and_store():
     try:

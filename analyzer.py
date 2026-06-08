@@ -41,11 +41,39 @@ def products_by_market_focus(conn):
     df=pd.read_sql_query(sql,conn)
     return df
 
+def most_active_scrape_day(conn):                                                                           #Subquery that finds the count of products entered into DB on specific days
+    sql="""
+        SELECT date, count 
+        FROM 
+            (SELECT DATE(scraped_at) as date, COUNT(*) as count
+            FROM products
+            GROUP BY date) 
+        WHERE count = 
+            (SELECT MAX(count) 
+            FROM    
+                (SELECT DATE(scraped_at) as date, COUNT(*) as count
+                FROM products
+                GROUP BY date))
+        """
+    df=pd.read_sql_query(sql,conn)
+    return df
+
+def brands_with_significant_listings(conn, min_count):
+    sql="""
+        SELECT brand,COUNT(*) as product_count
+        FROM products
+        GROUP BY brand
+        HAVING product_count > ?
+        """
+    df=pd.read_sql_query(sql,conn,params=(min_count,))                                                      #Dont forget comma after min_count
+    return df
+
 if __name__ == "__main__":
     import sqlite3
     from config import DB_PATH
     
     conn = sqlite3.connect(DB_PATH)
-    df = products_by_market_focus(conn)
-    print(df)
+    print(products_by_market_focus(conn))
+    print(most_active_scrape_day(conn))
+    print(brands_with_significant_listings(conn,10))
     conn.close()
