@@ -91,6 +91,18 @@ def update_price_changes(conn):
                 """)
     conn.commit()
 
+def add_column_days_tracked(conn):
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+                        ALTER TABLE products
+                        ADD COLUMN days_tracked INTERGER
+                    """)
+        conn.commit()
+        logger.info("Added price_drop column to products")
+    except Exception as e:
+        logger.info("price_drop column already exists, skipping")
+
 def get_all(conn):
     cursor = conn.cursor()
     cursor.execute(""" SELECT * FROM products
