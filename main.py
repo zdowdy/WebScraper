@@ -3,7 +3,7 @@ import logging
 import schedule
 import time
 from config import DB_PATH, SCRAPE_INTERVAL_HOURS, BRANDS
-from database import init_db, insert_rows, insert_brands
+from database import init_db, insert_rows, insert_brands, update_price_changes
 from scraper import scrape_all_pages
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,7 @@ def scrape_and_store():
     try:
         rows = scrape_all_pages()
         insert_rows(conn, rows)
+        update_price_changes(conn)
         logger.info(f'Scrape run complete - {len(rows)} rows inserted')
     except Exception as e:
         logger.error(f'Scrape run failed: {e}')

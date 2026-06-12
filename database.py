@@ -14,6 +14,7 @@ def init_db(conn):
                 model           TEXT,
                 brand           TEXT,
                 price           REAL,
+                price_change    REAL,
                 rating          REAL,
                 num_reviews     INTEGER,
                 in_stock        INTEGER,
@@ -76,19 +77,19 @@ def insert_rows(conn, rows):
         )
     conn.commit()
 
-def add_price_drop_column(conn):
+def update_price_changes(conn):
     cursor = conn.cursor()
-
-    try:
-        cursor.execute("""
-                   ALTER TABLE products 
-                   ADD COLUMN price_drop REAL
-                   """
-        )
-        conn.commit()
-        logger.info('Added price_drop column to products')
-    except Exception as e:
-        logger.info('price_drop column already exists, skipping')
+    cursor.execute("""
+                UPDATE products
+                SET price_change = price - 
+                    (
+                    SELECT price FROM products as p2
+                    WHERE p2.url = products.url
+                    ORDER BY p2.scraped_at ASC
+                    LIMIT 1
+                    )
+                """)
+    conn.commit()
 
 def get_all(conn):
     cursor = conn.cursor()
@@ -114,8 +115,6 @@ if __name__ == '__main__':
     init_db (conn)
     rows = scrape_all_pages()
     insert_rows(conn, rows)
-
-    add_price_drop_column(conn)
 
     recent = get_recent(conn, 1)
     print(f'Rows from last 1 day: {len(recent)}')
