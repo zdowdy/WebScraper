@@ -96,12 +96,25 @@ def add_column_days_tracked(conn):
     try:
         cursor.execute("""
                         ALTER TABLE products
-                        ADD COLUMN days_tracked INTERGER
+                        ADD COLUMN days_tracked INTEGER
                     """)
         conn.commit()
-        logger.info("Added price_drop column to products")
+        logger.info("Added days_tracked column to products")
     except Exception as e:
-        logger.info("price_drop column already exists, skipping")
+        logger.info("days_tracked column already exists, skipping")
+
+def update_days_tracked(conn):
+    cursor = conn.cursor()
+    cursor.execute("""
+                   UPDATE products 
+                   SET days_tracked = 
+                   (
+                   SELECT COUNT(DISTINCT DATE(scraped_at))
+                   FROM products as p3
+                   WHERE p3.url = products.url
+                   )
+                """)
+    conn.commit()
 
 def get_all(conn):
     cursor = conn.cursor()
