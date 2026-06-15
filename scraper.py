@@ -6,8 +6,16 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-#pulls raw html string from url using requests.get and runs error recognition
-def _fetch(url:str) -> str|None:                                        
+def _fetch(url:str) -> str|None:
+    """
+    Request the raw html data from the url as a string using request.get and handles HTTP errors, timeouts, and network failures
+
+    Args:
+        url:the TARGET_URL assigned in config + the incrementing page numbers
+    
+    Returns:
+        the html string from each page of the website or None if there is a HTTP error, timeout, or network failure
+    """                                      
     try: 
         response = requests.get(url,headers = REQUEST_HEADERS,timeout = REQUEST_TIMEOUT)
         response.raise_for_status()                                
@@ -22,7 +30,16 @@ def _fetch(url:str) -> str|None:
         logger.error(f'Requests failed: {e}')
         return None  
 
-def _parse(html:str) -> list[dict]:                      
+def _parse(html:str) -> list[dict]:           
+    """
+    Locates the embedded JSON inside of the html data then parses the product data
+
+    Args:
+        html:is the html string from the website pages
+
+    Returns:
+        A list of dicts that contains the keys: title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at. Returns [] if it cannot locate or parse "__initialState__"
+    """           
 
     #locate the __initialState__ assignment in the raw HTML 
     idx = html.find('__initialState__={')                                
@@ -92,7 +109,16 @@ def _parse(html:str) -> list[dict]:
     return results
 
 #scrapes the website and returns data as a list of dicts ["->" is a return type hint]
-def scrape(url:str = TARGET_URL) -> list[dict]:                           
+def scrape(url:str = TARGET_URL) -> list[dict]:
+    """
+    Combines _fetch and _parse into one function that pulls the data as assigns it to a list of dicts
+
+    Args:
+        url: The full product listing from Newegg for one page and it defaults to TARGET_URL from config.py
+
+    Returns:
+        A list of dicts containg the keys: title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at. If the request fails or no products are found it returns []
+    """                           
     raw_html = _fetch(url)
     if raw_html is None:                                                
         return []
@@ -100,6 +126,12 @@ def scrape(url:str = TARGET_URL) -> list[dict]:
 
 #this function was included to scrape all 20 pages on the product website
 def scrape_all_pages() -> list[dict]:
+    """
+    Increments the page number on the website to scrape 20 pages of products.
+     
+    Returns:
+        A list of dicts containg the keys: title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at. Pages that fail return [] and are skipped, results may be less than expected.
+    """
     
     results=[]
     
