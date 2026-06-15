@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger(__name__)
 
+
 def init_db(conn):
     """
     Using SQL create 2 tables if it does not exist already named products and brand_focus
@@ -16,7 +17,7 @@ def init_db(conn):
     """
     cursor = conn.cursor()
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS products 
+        CREATE TABLE IF NOT EXISTS products
                 (
                 id              INTEGER   PRIMARY KEY AUTOINCREMENT,
                 title           TEXT,
@@ -31,7 +32,6 @@ def init_db(conn):
                 scraped_at      TEXT
                 )
                    """)
-    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS brand_focus
                 (
@@ -40,9 +40,8 @@ def init_db(conn):
                 market_focus    TEXT
                 )
                     """)
-
-
     conn.commit()
+
 
 def insert_brands(conn, brands):
     """
@@ -69,9 +68,10 @@ def insert_brands(conn, brands):
         for brand in brands
         ]
         )
-    
+
     conn.commit()
-    
+
+
 def insert_rows(conn, rows):
     """
     Inserts id, title, model, brand, price, rating, num_reviews, in_stock, url, and scraped_at values into the table products
@@ -86,9 +86,9 @@ def insert_rows(conn, rows):
     cursor = conn.cursor()
 
     cursor.executemany("""
-        INSERT OR IGNORE INTO products 
-                       (title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+        INSERT OR IGNORE INTO products
+                       (title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [
         (
             row['title'],
@@ -106,6 +106,7 @@ def insert_rows(conn, rows):
         )
     conn.commit()
 
+
 def update_price_changes(conn):
     """
     Updates the table products with the SQL query for price_change which monitors the fluctuation in price from the first price scrape
@@ -119,7 +120,7 @@ def update_price_changes(conn):
     cursor = conn.cursor()
     cursor.execute("""
                 UPDATE products
-                SET price_change = price - 
+                SET price_change = price -
                     (
                     SELECT price FROM products as p2
                     WHERE p2.url = products.url
@@ -128,6 +129,7 @@ def update_price_changes(conn):
                     )
                 """)
     conn.commit()
+
 
 def add_column_days_tracked(conn):
     """
@@ -146,8 +148,9 @@ def add_column_days_tracked(conn):
                     """)
         conn.commit()
         logger.info("Added days_tracked column to products")
-    except Exception as e:
+    except Exception:
         logger.info("days_tracked column already exists, skipping")
+
 
 def update_days_tracked(conn):
     """
@@ -161,8 +164,8 @@ def update_days_tracked(conn):
     """
     cursor = conn.cursor()
     cursor.execute("""
-                   UPDATE products 
-                   SET days_tracked = 
+                   UPDATE products
+                   SET days_tracked =
                    (
                    SELECT COUNT(DISTINCT DATE(scraped_at))
                    FROM products as p3
@@ -170,6 +173,7 @@ def update_days_tracked(conn):
                    )
                 """)
     conn.commit()
+
 
 def get_all(conn):
     """
@@ -184,17 +188,18 @@ def get_all(conn):
     cursor = conn.cursor()
     cursor.execute(""" SELECT * FROM products
                        ORDER BY scraped_at DESC""")
-    
+
     return cursor.fetchall()
 
-def get_recent(conn,n_days):
+
+def get_recent(conn, n_days):
     """
     Returns all products scraped within the last n_days
 
     Args:
         conn: Active SQLite connection created in main.py
         n_days: the number of days to look back from now
-    
+
     Returns:
         a list of tuples containing the rows scraped after the cutoff timestamp. Returns [] if no rows fall in the cutoff window
     """
@@ -205,13 +210,14 @@ def get_recent(conn,n_days):
                        ORDER BY scraped_at DESC""",
                        (cutoff,))
     return cursor.fetchall()
-    
+
+
 if __name__ == '__main__':
     from scraper import scrape_all_pages
     from config import DB_PATH
 
     conn = sqlite3.connect(DB_PATH)
-    init_db (conn)
+    init_db(conn)
     rows = scrape_all_pages()
     insert_rows(conn, rows)
 

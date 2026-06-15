@@ -1,17 +1,18 @@
 import matplotlib.pyplot as plt
 from config import OUTPUT_DIR
 
+
 def plot_price_trend(df):
     """
     Creates a line graph using matplotlib that graphs the date to the avg_price of products that day from products
 
     Args:
         df:pandas Dataframe with columns date and avg_price returned by avg_price_by_day()
-    
+
     Returns:
         None. Saves chart to OUTPUT_DIR/price_trend.png.
     """
-    plt.figure(figsize=(10,5))
+    plt.figure(figsize=(10, 5))
     plt.plot(df['date'], df['avg_price'])
     plt.title('Average Cost of Memory by Day from Newegg')
     plt.xlabel('Day')
@@ -20,17 +21,18 @@ def plot_price_trend(df):
     plt.savefig(OUTPUT_DIR / 'price_trend.png', dpi=150, bbox_inches='tight')
     plt.close()
 
+
 def plot_top_brands(df):
     """
-    Creates a bar graph using matplotlib that graphs the brand to the brand_count in descending order from products 
+    Creates a bar graph using matplotlib that graphs the brand to the brand_count in descending order from products
 
     Args:
         df:pandas DataFrame with columns brand and brand_count returned from top_brands()
-    
+
     Returns:
         None. Saves chart to OUTPUT_DIR/top_brands.png.
     """
-    plt.figure(figsize=(15,5))
+    plt.figure(figsize=(15, 5))
     plt.bar(df['brand'], df['brand_count'])
     plt.title('Product Count by Brand from Newegg in Descending Order')
     plt.xlabel('Brand')
@@ -38,6 +40,7 @@ def plot_top_brands(df):
     plt.xticks(rotation=45, ha='right')
     plt.savefig(OUTPUT_DIR / 'top_brands.png', dpi=150, bbox_inches='tight')
     plt.close()
+
 
 def plot_avg_price_by_brand(df):
     """
@@ -49,13 +52,14 @@ def plot_avg_price_by_brand(df):
     Returns:
         None. Saves chart to OUTPUT_DIR/avg_price_by_brand.png.
     """
-    plt.figure(figsize=(12,15))
+    plt.figure(figsize=(12, 15))
     plt.barh(df['brand'], df['avg_price'])
     plt.title('Average Cost of Memory by Brand from Newegg in Descending Order')
     plt.xlabel('Average Price of Memory')
     plt.ylabel('Brand')
     plt.savefig(OUTPUT_DIR / 'avg_price_by_brand.png', dpi=150, bbox_inches='tight')
     plt.close()
+
 
 if __name__ == "__main__":
     import sqlite3

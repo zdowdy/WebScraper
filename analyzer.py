@@ -1,17 +1,18 @@
 import pandas as pd
 
+
 def avg_price_by_day(conn):
     """
     Calculate the avg_price per day from all scrape cycles
 
     Args:
         conn: Active SQLite connection created in main.py
-    
+
     Returns:
         pandas DataFrame with columns date and avg_price in ascending order
     """
 
-    sql="""
+    sql = """
         SELECT DATE(scraped_at) as date, AVG(price) as avg_price
         FROM products
         GROUP BY date
@@ -20,25 +21,27 @@ def avg_price_by_day(conn):
     df = pd.read_sql_query(sql, conn)
     return df
 
+
 def top_brands(conn):
     """
     Calculate the brands with the most product count from all scrape cycles
 
     Args:
         conn: Active SQLite connection created in main.py
-    
+
     Returns:
         pandas DataFrame with columns brand and brand_count in descending order
     """
 
-    sql="""
+    sql = """
         SELECT brand, COUNT(*) as brand_count
         FROM products
         GROUP BY brand
         ORDER BY brand_count DESC
     """
-    df = pd.read_sql_query(sql,conn)
+    df = pd.read_sql_query(sql, conn)
     return df
+
 
 def avg_price_by_brand(conn):
     """
@@ -46,19 +49,20 @@ def avg_price_by_brand(conn):
 
     Args:
         conn: Active SQLite connection created in main.py
-    
+
     Returns:
         pandas DataFrame with columns brand and avg_price in descending order
     """
 
-    sql="""
+    sql = """
         SELECT brand, AVG(price) as avg_price
         FROM products
         GROUP BY brand
         ORDER BY avg_price DESC
     """
-    df=pd.read_sql_query(sql, conn)
+    df = pd.read_sql_query(sql, conn)
     return df
+
 
 def products_by_market_focus(conn):
     """
@@ -66,20 +70,21 @@ def products_by_market_focus(conn):
 
     Args:
         conn: Active SQLite connection created in main.py
-    
+
     Returns:
         pandas DataFrame with columns market_focus, avg_price, and product_count in descending order
     """
 
-    sql="""
+    sql = """
         SELECT brand_focus.market_focus, AVG(products.price) as avg_price, COUNT(*) as product_count
         FROM products
         JOIN brand_focus ON products.brand = brand_focus.brand_name
         GROUP BY brand_focus.market_focus
         ORDER BY avg_price DESC
     """
-    df=pd.read_sql_query(sql,conn)
+    df = pd.read_sql_query(sql, conn)
     return df
+
 
 def most_active_scrape_day(conn):
     """
@@ -87,26 +92,27 @@ def most_active_scrape_day(conn):
 
     Args:
         conn: Active SQLite connection created in main.py
-    
+
     Returns:
         pandas DataFrame with columns date and count
-    """   
+    """
 
-    sql="""
-        SELECT date, count 
-        FROM 
+    sql = """
+        SELECT date, count
+        FROM
             (SELECT DATE(scraped_at) as date, COUNT(*) as count
             FROM products
-            GROUP BY date) 
-        WHERE count = 
-            (SELECT MAX(count) 
-            FROM    
+            GROUP BY date)
+        WHERE count =
+            (SELECT MAX(count)
+            FROM
                 (SELECT DATE(scraped_at) as date, COUNT(*) as count
                 FROM products
                 GROUP BY date))
         """
-    df=pd.read_sql_query(sql,conn)
+    df = pd.read_sql_query(sql, conn)
     return df
+
 
 def brands_with_significant_listings(conn, min_count):
     """
@@ -115,26 +121,27 @@ def brands_with_significant_listings(conn, min_count):
     Args:
         conn: Active SQLite connection created in main.py
         min_count: the minimum count of products a brand can have in order to pass query
-    
+
     Returns:
         pandas DataFrame with columns brand and product_count
     """
 
-    sql="""
+    sql = """
         SELECT brand,COUNT(*) as product_count
         FROM products
         GROUP BY brand
         HAVING product_count > ?
         """
-    df=pd.read_sql_query(sql,conn,params=(min_count,))                                                      #Dont forget comma after min_count
+    df = pd.read_sql_query(sql, conn, params=(min_count,))                                                        # Dont forget comma after min_count
     return df
+
 
 if __name__ == "__main__":
     import sqlite3
     from config import DB_PATH
-    
+
     conn = sqlite3.connect(DB_PATH)
     print(products_by_market_focus(conn))
     print(most_active_scrape_day(conn))
-    print(brands_with_significant_listings(conn,10))
+    print(brands_with_significant_listings(conn, 10))
     conn.close()
