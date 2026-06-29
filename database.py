@@ -19,17 +19,19 @@ def init_db(conn):
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS products
                 (
-                id              INTEGER   PRIMARY KEY AUTOINCREMENT,
-                title           TEXT,
-                model           TEXT,
-                brand           TEXT,
-                price           REAL,
-                price_change    REAL,
-                rating          REAL,
-                num_reviews     INTEGER,
-                in_stock        INTEGER,
-                url             TEXT      UNIQUE,
-                scraped_at      TEXT
+                id               INTEGER   PRIMARY KEY AUTOINCREMENT,
+                title            TEXT,
+                brand            TEXT,
+                model            TEXT,
+                original_price   REAL,
+                current_price    REAL,
+                price_change_pct REAL,
+                days_tracked     INTEGER,
+                rating           REAL,
+                num_reviews      INTEGER,
+                in_stock         INTEGER,
+                url              TEXT      UNIQUE,
+                scraped_at       TEXT
                 )
                    """)
     cursor.execute("""
@@ -74,27 +76,41 @@ def insert_brands(conn, brands):
 
 def insert_rows(conn, rows):
     """
-    Inserts id, title, model, brand, price, rating, num_reviews, in_stock, url, and scraped_at values into the table products
+    Inserts id, title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, and scraped_at values into the table products
 
     Args:
         conn: Active SQLite connection created in main.py
-        rows: a list of dicts from scraper.py that holds title, model, brand, price, rating, num_reviews, in_stock, url, and scraped_at data
+        rows: a list of dicts from scraper.py that holds title, brand, model, price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, and scraped_at data
 
     Returns:
-        None. Commits inserted rows into the database
+        tuple(new_count, updated_count): new_count is the number of new producst inserted in the DB and updated_count is the number of existing products that got there data updated
     """
     cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM products
+                                   """)
+    before_count = cursor.fetchone()[0]
 
     cursor.executemany("""
-        INSERT OR IGNORE INTO products
-                       (title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        INSERT INTO products
+                (title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, scraped_at)
+        VALUES  
+                (?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, ?)
+        ON CONFLICT(url) DO UPDATE SET
+                current_price = excluded.current_price,
+                price_change_pct = ROUND(((excluded.current_price - original_price) / original_price) * 100, 2),
+                days_tracked = days_tracked + 1,
+                scraped_at =  excluded.scraped_at
+               """,
         [
         (
             row['title'],
-            row['model'],
             row['brand'],
-            row['price'],
+            row['model'],
+            row['price'],                                   #original_price
+            row['price'],                                   #current_price
             row['rating'],
             row['num_reviews'],
             row['in_stock'],
@@ -104,75 +120,19 @@ def insert_rows(conn, rows):
         for row in rows
         ]
         )
-    conn.commit()
-
-
-def update_price_changes(conn):
-    """
-    Updates the table products with the SQL query for price_change which monitors the fluctuation in price from the first price scrape
-
-    Args:
-        conn: Active SQLite connection created in main.py
-
-    Returns:
-        None. Commits inserted rows into the database
-    """
-    cursor = conn.cursor()
+    
     cursor.execute("""
-                UPDATE products
-                SET price_change = price -
-                    (
-                    SELECT price FROM products as p2
-                    WHERE p2.url = products.url
-                    ORDER BY p2.scraped_at ASC
-                    LIMIT 1
-                    )
-                """)
+        SELECT COUNT(*)
+        FROM products
+                                   """)
+    after_count = cursor.fetchone()[0]
+
+    new_count = after_count - before_count
+    updated_count = len(rows) - new_count
+    
     conn.commit()
-
-
-def add_column_days_tracked(conn):
-    """
-    Inserts a column named days_tracked using ALTER TABLE and checks if the column has already been added if it has output that the column already exists
-
-    Args:
-        conn: Active SQLite connection created in main.py
-    Returns:
-        None. Commits inserted column into the database
-    """
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-                        ALTER TABLE products
-                        ADD COLUMN days_tracked INTEGER
-                    """)
-        conn.commit()
-        logger.info("Added days_tracked column to products")
-    except Exception:
-        logger.info("days_tracked column already exists, skipping")
-
-
-def update_days_tracked(conn):
-    """
-    Updates the table products with the SQL query for days_tracked which logs how many days the product has been in the DB for
-
-    Args:
-        conn: Active SQLite connection created in main.py
-
-    Returns:
-        None. Commits inserted rows into the database
-    """
-    cursor = conn.cursor()
-    cursor.execute("""
-                   UPDATE products
-                   SET days_tracked =
-                   (
-                   SELECT COUNT(DISTINCT DATE(scraped_at))
-                   FROM products as p3
-                   WHERE p3.url = products.url
-                   )
-                """)
-    conn.commit()
+    
+    return new_count, updated_count
 
 
 def get_all(conn):
