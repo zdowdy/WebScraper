@@ -13,7 +13,7 @@ def avg_price_by_day(conn):
     """
 
     sql = """
-        SELECT DATE(scraped_at) as date, AVG(price) as avg_price
+        SELECT DATE(scraped_at) as date, AVG(current_price) as avg_price
         FROM products
         GROUP BY date
         ORDER BY date ASC
@@ -55,7 +55,7 @@ def avg_price_by_brand(conn):
     """
 
     sql = """
-        SELECT brand, AVG(price) as avg_price
+        SELECT brand, AVG(current_price) as avg_price
         FROM products
         GROUP BY brand
         ORDER BY avg_price DESC
@@ -76,7 +76,7 @@ def products_by_market_focus(conn):
     """
 
     sql = """
-        SELECT brand_focus.market_focus, AVG(products.price) as avg_price, COUNT(*) as product_count
+        SELECT brand_focus.market_focus, AVG(products.current_price) as avg_price, COUNT(*) as product_count
         FROM products
         JOIN brand_focus ON products.brand = brand_focus.brand_name
         GROUP BY brand_focus.market_focus
