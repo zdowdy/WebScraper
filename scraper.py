@@ -1,7 +1,7 @@
 import json
 import logging
 import requests
-from config import TARGET_URL, REQUEST_HEADERS, REQUEST_TIMEOUT
+from config import REQUEST_HEADERS, REQUEST_TIMEOUT
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -112,12 +112,12 @@ def _parse(html: str) -> list[dict]:
 
 
 # scrapes the website and returns data as a list of dicts ["->" is a return type hint]
-def scrape(url: str = TARGET_URL) -> list[dict]:
+def scrape(url: str) -> list[dict]:
     """
     Combines _fetch and _parse into one function that pulls the data as assigns it to a list of dicts
 
     Args:
-        url: The full product listing from Newegg for one page and it defaults to TARGET_URL from config.py
+        url: Uses a url to _fetch data from then format the data using _parse  
 
     Returns:
         A list of dicts containg the keys: title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at. If the request fails or no products are found it returns []
@@ -129,27 +129,36 @@ def scrape(url: str = TARGET_URL) -> list[dict]:
 
 
 # this function was included to scrape all 20 pages on the product website
-def scrape_all_pages() -> list[dict]:
+def scrape_all_pages(category, base_url) -> list[dict]:
     """
     Increments the page number on the website to scrape 20 pages of products.
 
+    Args:
+        category: The category name to add to each prdocut row EX RAM,CPU,GPU
+        base_url: The Newegg listing url for the coresponding category found in config.py under CATEGORIES
     Returns:
-        A list of dicts containg the keys: title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at. Pages that fail return [] and are skipped, results may be less than expected.
+        All products across all 20 pages, each tagged with 'category'. Failed pages return [] and are skipped.
     """
 
     results = []
-
+    
     for page_num in range(1, 21):
-        url = f'{TARGET_URL}&page={page_num}'
-        results.extend(scrape(url))
+        url = f'{base_url}&page={page_num}'
         logger.info(f'Scraping page {page_num} of 20')
+        page_results = scrape(url)
+        for product in page_results:
+            product['category'] = category
+        results.extend(page_results)
+
 
     return results
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    products = scrape_all_pages()
+    from config import CATEGORIES
+
+    products = scrape_all_pages('CPU', CATEGORIES['CPU'])
     print(f'Found {len(products)} products\n')
     for p in products[:3]:                                                # print the first 3 products to verify shape and content
         print(p)

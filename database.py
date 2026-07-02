@@ -20,6 +20,7 @@ def init_db(conn):
         CREATE TABLE IF NOT EXISTS products
                 (
                 id               INTEGER   PRIMARY KEY AUTOINCREMENT,
+                category         TEXT,
                 title            TEXT,
                 brand            TEXT,
                 model            TEXT,
@@ -33,7 +34,7 @@ def init_db(conn):
                 url              TEXT      UNIQUE,
                 scraped_at       TEXT
                 )
-                   """)
+        """)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS brand_focus
                 (
@@ -41,7 +42,25 @@ def init_db(conn):
                 brand_name      TEXT      UNIQUE,
                 market_focus    TEXT
                 )
-                    """)
+        """)
+    cursor.execute("""
+        CREATE VIEW IF NOT EXISTS ram_products AS
+        SELECT * 
+        FROM products
+        WHERE category = 'RAM'
+        """)
+    cursor.execute("""
+        CREATE VIEW IF NOT EXISTS cpu_products AS
+        SELECT * 
+        FROM products
+        WHERE category = 'CPU'
+        """)
+    cursor.execute("""
+        CREATE VIEW IF NOT EXISTS gpu_products AS
+        SELECT * 
+        FROM products
+        WHERE category = 'GPU'
+        """)
     conn.commit()
 
 
@@ -76,11 +95,11 @@ def insert_brands(conn, brands):
 
 def insert_rows(conn, rows):
     """
-    Inserts id, title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, and scraped_at values into the table products
+    Inserts id, category, title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, and scraped_at values into the table products
 
     Args:
         conn: Active SQLite connection created in main.py
-        rows: a list of dicts from scraper.py that holds title, brand, model, price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, and scraped_at data
+        rows: a list of dicts from scraper.py that holds category, title, brand, model, price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, and scraped_at data
 
     Returns:
         tuple(new_count, updated_count): new_count is the number of new producst inserted in the DB and updated_count is the number of existing products that got there data updated
@@ -95,9 +114,9 @@ def insert_rows(conn, rows):
 
     cursor.executemany("""
         INSERT INTO products
-                (title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, scraped_at)
+                (category, title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, scraped_at)
         VALUES  
-                (?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, ?)
+                (?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, ?)
         ON CONFLICT(url) DO UPDATE SET
                 current_price = excluded.current_price,
                 price_change_pct = ROUND(((excluded.current_price - original_price) / original_price) * 100, 2),
@@ -106,6 +125,7 @@ def insert_rows(conn, rows):
                """,
         [
         (
+            row['category'],
             row['title'],
             row['brand'],
             row['model'],

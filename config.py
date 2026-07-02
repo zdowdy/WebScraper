@@ -7,7 +7,11 @@ OUTPUT_DIR = BASE_DIR / 'output'
 LOG_FILE = BASE_DIR / 'scraper.log'
 
 # Scraper
-TARGET_URL = 'https://www.newegg.com/p/pl?N=100006650'
+CATEGORIES = {
+    'RAM': 'https://www.newegg.com/p/pl?N=100006650',
+    'CPU': 'https://www.newegg.com/p/pl?N=100006676',
+    'GPU': 'https://www.newegg.com/p/pl?N=100007709'
+}
 REQUEST_TIMEOUT = 15                                                    # the amount of times in sec before gibing up on a url request
 REQUEST_HEADERS = {                                                     # very important will get a 403 or bot-detection error without realistic header
     "User-Agent": (
