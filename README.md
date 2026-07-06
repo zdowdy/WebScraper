@@ -31,6 +31,7 @@ to buy.
 - Covered by pytest tests using an in-memory SQLite database
 
 ## Project Structure
+```
 WebScraper/
 ├── config.py       # settings, paths, category URLs, brand market focus
 ├── scraper.py      # fetches and parses Newegg listings per category
@@ -40,6 +41,8 @@ WebScraper/
 ├── visualizer.py   # matplotlib chart generation, category-aware
 ├── tests/          # pytest test suite
 └── requirements.txt
+```
+
 
 ## Setup
 1. Clone the repository
@@ -74,16 +77,11 @@ In `config.py`:
   Newegg mixes into the GPU category page
 
 ## Skills Demonstrated
-**Python:** `requests`, `json`, `re`, `schedule`, `logging`,
-`datetime`, `sqlite3`, `pytest`, `unittest.mock`
-**SQL:** `CREATE TABLE`, `ALTER TABLE`, `INSERT ... ON CONFLICT DO UPDATE`
-(UPSERT), `CREATE VIEW`, `JOIN`, subqueries, `SELECT`, `WHERE`,
-`GROUP BY`, `HAVING`, `ORDER BY`, `AVG()`, `COUNT()`, `DATE()`, `ROUND()`
-**Libraries:** pandas, matplotlib
-**Concepts:** JSON extraction from embedded JavaScript, parameterized
-queries to prevent SQL injection, composite unique constraints,
-automated scheduling, category-aware data pipelines, data cleaning
-and validation, data visualization
+
+- **Python:** `requests`, `json`, `re`, `schedule`, `logging`, `datetime`, `sqlite3`, `pytest`, `unittest.mock`
+- **SQL:** `CREATE TABLE`, `ALTER TABLE`, `INSERT ... ON CONFLICT DO UPDATE` (UPSERT), `CREATE VIEW`, `JOIN`, subqueries, `SELECT`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`, `AVG()`, `COUNT()`, `DATE()`, `ROUND()`
+- **Libraries:** pandas, matplotlib
+- **Concepts:** JSON extraction from embedded JavaScript, parameterized queries to prevent SQL injection, composite unique constraints, automated scheduling, category-aware data pipelines, data cleaning and validation, data visualization
 
 ## Dependencies
 - requests==2.34.2
