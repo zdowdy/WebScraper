@@ -1,7 +1,7 @@
 import json
 import logging
 import requests
-from config import REQUEST_HEADERS, REQUEST_TIMEOUT
+from config import REQUEST_HEADERS, REQUEST_TIMEOUT, GPU_EXCLUDED_BRANDS
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -148,6 +148,13 @@ def scrape_all_pages(category, base_url) -> list[dict]:
         page_results = scrape(url)
         for product in page_results:
             product['category'] = category
+        
+        if category == 'CPU':                                                                                           # filters out all bundles and unrekognized brands for CPU category, only keeping Intel and AMD
+            page_results = [p for p in page_results if p.get('brand') in ('Intel', 'AMD')]
+
+        if category == 'GPU':
+            page_results = [p for p in page_results if p.get('brand') not in GPU_EXCLUDED_BRANDS]
+
         results.extend(page_results)
 
 

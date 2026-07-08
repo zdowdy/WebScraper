@@ -39,8 +39,10 @@ def init_db(conn):
         CREATE TABLE IF NOT EXISTS brand_focus
                 (
                 id              INTEGER   PRIMARY KEY AUTOINCREMENT,
-                brand_name      TEXT      UNIQUE,
-                market_focus    TEXT
+                category        TEXT,
+                brand_name      TEXT,
+                market_focus    TEXT,
+                UNIQUE(category, brand_name)
                 )
         """)
     cursor.execute("""
@@ -79,10 +81,11 @@ def insert_brands(conn, brands):
 
     cursor.executemany("""
         INSERT OR IGNORE INTO brand_focus
-                        (brand_name, market_focus)
-                        VALUES(?,?)""",
+                        (category, brand_name, market_focus)
+                        VALUES(?,?,?)""",
         [
         (
+            brand['category'],
             brand['brand_name'],
             brand['market_focus']
         )

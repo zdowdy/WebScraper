@@ -86,7 +86,7 @@ def products_by_market_focus(conn, category):
         SELECT brand_focus.market_focus, AVG(products.current_price) as avg_price, COUNT(*) as product_count
         FROM products
         JOIN brand_focus ON products.brand = brand_focus.brand_name
-        WHERE category = ?
+        WHERE products.category = ?
         GROUP BY brand_focus.market_focus
         ORDER BY avg_price DESC
     """
@@ -156,5 +156,5 @@ if __name__ == "__main__":
     conn = sqlite3.connect(DB_PATH)
     print(products_by_market_focus(conn, 'CPU'))
     print(most_active_scrape_day(conn, 'GPU'))
-    print(brands_with_significant_listings(conn, 'RAM', 10))
+    print(brands_with_significant_listings(conn, 3, 'RAM'))
     conn.close()
