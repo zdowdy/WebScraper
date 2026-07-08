@@ -117,7 +117,7 @@ def scrape(url: str) -> list[dict]:
     Combines _fetch and _parse into one function that pulls the data as assigns it to a list of dicts
 
     Args:
-        url: Uses a url to _fetch data from then format the data using _parse  
+        url: Uses a url to _fetch data from then format the data using _parse
 
     Returns:
         A list of dicts containg the keys: title, model, brand, price, rating, num_reviews, in_stock, url, scraped_at. If the request fails or no products are found it returns []
@@ -141,14 +141,14 @@ def scrape_all_pages(category, base_url) -> list[dict]:
     """
 
     results = []
-    
+
     for page_num in range(1, 21):
         url = f'{base_url}&page={page_num}'
         logger.info(f'Scraping page {page_num} of 20')
         page_results = scrape(url)
         for product in page_results:
             product['category'] = category
-        
+
         if category == 'CPU':                                                                                           # filters out all bundles and unrekognized brands for CPU category, only keeping Intel and AMD
             page_results = [p for p in page_results if p.get('brand') in ('Intel', 'AMD')]
 
@@ -156,7 +156,6 @@ def scrape_all_pages(category, base_url) -> list[dict]:
             page_results = [p for p in page_results if p.get('brand') not in GPU_EXCLUDED_BRANDS]
 
         results.extend(page_results)
-
 
     return results
 

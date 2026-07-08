@@ -47,19 +47,19 @@ def init_db(conn):
         """)
     cursor.execute("""
         CREATE VIEW IF NOT EXISTS ram_products AS
-        SELECT * 
+        SELECT *
         FROM products
         WHERE category = 'RAM'
         """)
     cursor.execute("""
         CREATE VIEW IF NOT EXISTS cpu_products AS
-        SELECT * 
+        SELECT *
         FROM products
         WHERE category = 'CPU'
         """)
     cursor.execute("""
         CREATE VIEW IF NOT EXISTS gpu_products AS
-        SELECT * 
+        SELECT *
         FROM products
         WHERE category = 'GPU'
         """)
@@ -108,7 +108,7 @@ def insert_rows(conn, rows):
         tuple(new_count, updated_count): new_count is the number of new producst inserted in the DB and updated_count is the number of existing products that got there data updated
     """
     cursor = conn.cursor()
-    
+
     cursor.execute("""
         SELECT COUNT(*)
         FROM products
@@ -118,7 +118,7 @@ def insert_rows(conn, rows):
     cursor.executemany("""
         INSERT INTO products
                 (category, title, brand, model, original_price, current_price, price_change_pct, days_tracked, rating, num_reviews, in_stock, url, scraped_at)
-        VALUES  
+        VALUES
                 (?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, ?)
         ON CONFLICT(url) DO UPDATE SET
                 current_price = excluded.current_price,
@@ -132,8 +132,8 @@ def insert_rows(conn, rows):
             row['title'],
             row['brand'],
             row['model'],
-            row['price'],                                   #original_price
-            row['price'],                                   #current_price
+            row['price'],                                   # original_price
+            row['price'],                                   # current_price
             row['rating'],
             row['num_reviews'],
             row['in_stock'],
@@ -143,7 +143,7 @@ def insert_rows(conn, rows):
         for row in rows
         ]
         )
-    
+
     cursor.execute("""
         SELECT COUNT(*)
         FROM products
@@ -152,9 +152,9 @@ def insert_rows(conn, rows):
 
     new_count = after_count - before_count
     updated_count = len(rows) - new_count
-    
+
     conn.commit()
-    
+
     return new_count, updated_count
 
 
