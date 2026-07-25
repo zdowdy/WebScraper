@@ -9,7 +9,7 @@ prices from Newegg over time, so I can spot trends and find the best time
 to buy.
 
 ## Sample Output
-![Price Trend](output/RAM_price_trend.png)
+![Price Trend](output/GPU_price_trend.png)
 
 ## Features
 - Scrapes all 20 pages of RAM, CPU, and GPU listings from Newegg across
